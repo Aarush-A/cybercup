@@ -27,7 +27,7 @@ pairs = [
         "- Control Erosion\n- Properly Manage Stormwater\n- Maintain Your Vehicle\n- Reduce Plastic Waste\n- Upgrade and Maintain Septic Systems"
         "- Promote Sustainable Agriculture\n- Implement Industrial Best Practices"
     ]),
-    (r"(.*)(government|authorities)(.*)", [
+    (r"(.*)(government|authorities | govt)(.*)", [
         "\n- Central Pollution Control Board (CPCB)"
         "- State Pollution Control Boards (SPCBs)\n- Pollution Control Committees (PCCs)\n- Central Water Commission (CWC), you can team up with them to help save a waterbody near you"        
     ]),
@@ -226,7 +226,7 @@ pairs = [
     (r"(.*)(chemical runoff|stormwater management)(.*)", ["Effective stormwater management helps prevent chemical runoff and protects water bodies."]),
     (r"(.*)(groundwater pollution prevention|best practices)(.*)", ["Preventing groundwater pollution involves best practices like reducing chemical usage and implementing monitoring systems."]),
     (r"(.*)(pollution effects|aquatic ecosystems)(.*)", ["Pollution has adverse effects on aquatic ecosystems, leading to habitat destruction and species decline."]),
-    (r"(.*)(water conservation regulations|government policies)(.*)", ["Government policies and regulations play a significant role in water conservation efforts."]),
+    (r"(.*)(water conservation regulations|government policies| govt policies)(.*)", ["Government policies and regulations play a significant role in water conservation efforts."]),
     (r"(.*)(nutrient pollution|water quality issues)(.*)", ["Nutrient pollution causes water quality issues like eutrophication, algae blooms, and harm to aquatic life."]),
     (r"(.*)(environmental organizations|river conservation)(.*)", ["Environmental organizations are actively involved in river conservation efforts to protect aquatic environments."]),
     (r"(.*)(stormwater runoff|urban areas)(.*)", ["Stormwater runoff in urban areas carries pollutants like oil, chemicals, and debris into water bodies."]),
@@ -251,7 +251,7 @@ pairs = [
     (r"(.*)(drinking water contamination|water treatment)(.*)", ["Water treatment processes help in removing contaminants and ensuring safe drinking water."]),
     (r"(.*)(reduce agricultural runoff|best practices)(.*)", ["Best practices to reduce agricultural runoff include using buffer zones, cover crops, and reducing chemical use."]),
     (r"(.*)(sedimentation|river water quality)(.*)", ["Sedimentation affects river water quality by increasing turbidity and carrying pollutants."]),
-    (r"(.*)(water conservation grants|government support)(.*)", ["Government grants and support are available for water conservation projects and initiatives."]),
+    (r"(.*)(water conservation grants|government support| govt support)(.*)", ["Government grants and support are available for water conservation projects and initiatives."]),
     (r"(.*)(fish population decline|pollution impacts)(.*)", ["Fish population decline is a consequence of pollution impacts like habitat loss and water toxicity."]),
     (r"(.*)(riverbank vegetation|erosion control)(.*)", ["Riverbank vegetation is crucial for erosion control and stabilizing riverbanks."]),
     (r"(.*)(marine conservation|pollution prevention)(.*)", ["Marine conservation efforts focus on preventing pollution, protecting ecosystems, and marine species."]),
@@ -297,12 +297,11 @@ pairs = [
     (r"(.*)(water pollution education|schools)(.*)", ["Water pollution education in schools instills awareness and responsibility for conserving water bodies."]),
     (r"(.*)(river restoration funding|nonprofit organizations)(.*)", ["Nonprofit organizations often provide river restoration funding to support conservation initiatives."]),
     (r"(.*)(urban development|riverfront rehabilitation)(.*)", ["Urban development projects may include riverfront rehabilitation to revitalize waterfront areas."]),
-    (r"(.*)(water conservation policy|government initiatives)(.*)", ["Government initiatives establish water conservation policies and regulations to protect water resources."]),
+    (r"(.*)(water conservation policy|government initiatives| govt initiatives)(.*)", ["Government initiatives establish water conservation policies and regulations to protect water resources."]),
     (r"(.*)(aquatic life conservation|wetland restoration)(.*)", ["Wetland restoration contributes to aquatic life conservation by recreating critical habitats."]),
     (r"(.*)(effective water management|watershed councils)(.*)", ["Effective water management involves collaboration with watershed councils and local stakeholders."]),
     (r"(.*)(clean energy technologies|water desalination)(.*)", ["Clean energy technologies support water desalination as a sustainable solution for water scarcity."]),    
 ]
-
 
 def respond_to_input(user_input):
     for pattern, responses in pairs:
@@ -313,73 +312,66 @@ def respond_to_input(user_input):
 st.title("Water Conservation Bot")
 
 recognizer = sr.Recognizer()
+tmp_audio_file = None
 enter_pressed = False  # Initialize the Enter key flag
 
-# Function to set dynamic energy threshold for audio capture
 def set_dynamic_energy_threshold(source):
     with source as audio_source:
         recognizer.adjust_for_ambient_noise(audio_source)
         energy_threshold = recognizer.energy_threshold
     return energy_threshold
 
-# Function to capture audio
 def capture_audio(energy_threshold):
     with sr.Microphone() as source:
         recognizer.energy_threshold = energy_threshold
         audio = recognizer.listen(source, timeout=5)
     return audio
 
-# Add a radio button for input method
-input_method = st.radio("Select input method:", ("Text Input", "Voice Input"))
+user_input = st.text_input("Enter text or click the 🎙 Record Speech button to speak:", key="user_input")
 
-if input_method == "Text Input":
-    user_input = st.text_input("Enter text:", key="user_input")
-    if st.button("Submit") or enter_pressed:
-        enter_pressed = False
-        if user_input.lower() == "exit":
-            st.write("Chatbot: Goodbye!")
+if st.button("🎙 Record Speech"):
+    try:
+        st.write("Listening...")
+        energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
+        audio = capture_audio(energy_threshold)
+        user_speech = recognizer.recognize_google(audio)
+        
+        # Set recognized speech as the value of the text input
+        user_input = user_speech
+        st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
+    except sr.UnknownValueError:
+        st.write("I could not understand the audio.")
+    except sr.RequestError as e:
+        st.write(f"Error: {e}")
+
+if st.button("Submit") or enter_pressed:
+    enter_pressed = False
+    if user_input.lower() == "exit":
+        st.write("Chatbot: Goodbye!")
+    else:
+        responses = respond_to_input(user_input)
+        chatbot_response = responses[0]
+        st.write("Chatbot:", chatbot_response)
+
+        tts = gTTS(chatbot_response)
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
+            tts.save(tmp_audio_file.name)
+
+        audio_clip = mp.AudioFileClip(tmp_audio_file.name)
+        video_clip = mp.VideoFileClip("talkingreal.mp4")  # Replace with your video file
+
+        if audio_clip.duration > video_clip.duration:
+            num_loops = int(audio_clip.duration / video_clip.duration) + 1
+            video_clip_loop = mp.concatenate_videoclips([video_clip] * num_loops)
+            video_clip_loop = video_clip_loop.subclip(0, audio_clip.duration)
+            combined_clip = video_clip_loop.set_audio(audio_clip)
         else:
-            responses = respond_to_input(user_input)
-            chatbot_response = responses[0]
-            st.write("Chatbot:", chatbot_response)
-
-            tts = gTTS(chatbot_response)
-            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
-                tts.save(tmp_audio_file.name)
-
-            audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-            video_clip = mp.VideoFileClip("C:/Users/dell/Downloads/talking.mp4")  # Replace with your local video file path
-
-            # Optimize MoviePy operations
-            video_clip = video_clip.resize(height=720)  # Set the output resolution to 720p
             combined_clip = video_clip.set_audio(audio_clip)
-            combined_video_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+            combined_clip = combined_clip.set_duration(audio_clip.duration)  # Set video duration to match audio
 
-            # Use a faster video codec
-            combined_clip.write_videofile(combined_video_path, codec="h264", audio_codec="aac")
+        # Save the combined video to a temporary file
+        combined_video_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+        combined_clip.write_videofile(combined_video_path, codec="libx264", audio_codec="aac")
 
-            st.markdown(f'<video src="data:video/mp4;base64,{base64.b64encode(open(combined_video_path, "rb").read()).decode()}" autoplay controls style="width:100%"></video>', unsafe_allow_html=True)
-
-if input_method == "Voice Input":
-    if st.button("Start Listening"):
-        try:
-            st.write("Listening...")
-            energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
-            audio = capture_audio(energy_threshold)
-            user_speech = recognizer.recognize_google(audio)
-            st.write("You (speech):", user_speech)
-
-            if user_speech.lower() == "exit":
-                st.write("Chatbot: Goodbye!")
-            else:
-                responses = respond_to_input(user_speech)
-                chatbot_response = responses[0]
-                st.write("Chatbot:", chatbot_response)
-
-                tts = gTTS(chatbot_response)
-                with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
-                    tts.save(tmp_audio_file.name)
-        except sr.UnknownValueError:
-            st.write("I could not understand the audio.")
-        except sr.RequestError as e:
-            st.write(f"Error: {e}")
+        # Display the video using HTML and control its size with custom CSS
+        st.markdown(f'<video src="data:video/mp4;base64,{base64.b64encode(open(combined_video_path, "rb").read()).decode()}" autoplay controls style="width:100%"></video>', unsafe_allow_html=True)
