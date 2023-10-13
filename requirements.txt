@@ -1,6 +1,5 @@
-gtts==2.2.2
-moviepy==1.0.3
-nltk==3.6.4
-pyaudio==0.2.11
-speechrecognition==3.8.1
-streamlit==1.7.1
+streamlit
+speech_recognition
+nltk
+gtts
+moviepy
