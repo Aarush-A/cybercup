@@ -8,8 +8,8 @@ import moviepy.editor as mp
 import base64
 
 pairs = [
-    (r"(hello|hi|hey)", ["Hello! i am your friendly neighbourhood water saver bot ", "Hi there!"]),
-    (r"(.*)(check water quality)(.*)", [
+    (r"(hello|hi|hey|start)", ["Hello! i am your friendly neighbourhood water saver bot ", "Hi there!"]),
+    (r"(.*)(check water quality|ways to check water)(.*)", [
         "If the water is clear and has no visible particles, it is a good sign."
         "Cloudy water or water with particles may contain impurities."
     ]),
@@ -20,83 +20,79 @@ pairs = [
         "River pollution sources include:\n- Industrial Waste\n- Marine Dumping\n- Sewage and Wastewater"
         "- Oil Leaks and Spills\n- Agriculture\n- Global Warming\n- Radioactive Waste"
     ]),
-    (r"(.*)(reduce water pollution|reduce)(.*)", [
-        "Ways to reduce water pollution:\n- Monitor and Regulate Pollution Sources"
+    (r"(.*)(reduce water pollution|stop water pollution)(.*)", [
+        "- Monitor and Regulate Pollution Sources"
         "- Educate and Raise Awareness\n- Support Wastewater Treatment\n- Reduce Thermal Pollution\n- Support Legislation and Regulations"
         "- Participate in Cleanup Efforts\n- Properly Dispose of Household Hazardous Waste\n- Minimize Chemical Usage"
         "- Control Erosion\n- Properly Manage Stormwater\n- Maintain Your Vehicle\n- Reduce Plastic Waste\n- Upgrade and Maintain Septic Systems"
         "- Promote Sustainable Agriculture\n- Implement Industrial Best Practices"
     ]),
-    (r"(.*)(clean up polluted rivers|clean river|clean up)(.*)", [
-        "Efforts to clean up polluted rivers include:\n- Central Pollution Control Board (CPCB)"
+    (r"(.*)(government|authorities)(.*)", [
+        "\n- Central Pollution Control Board (CPCB)"
         "- State Pollution Control Boards (SPCBs)\n- Pollution Control Committees (PCCs)\n- Central Water Commission (CWC), you can team up with them to help save a waterbody near you"        
     ]),
-    (r"(.*)(river cleanup or volunteering)(.*)", [
+    (r"(.*)(ngos|volunteer)(.*)", [
         "Organizations for river cleanup and volunteering:\n- Water.org\n- WaterAid\n- World Wildlife Fund (WWF)"
         "- Charity: Water\n- The Nature Conservancy\n- UNICEF Water, Sanitation, and Hygiene (WASH) Program\n- Water For People"
     ]),
-    (r"(.*)(water body initiatives)(.*)", [
+    (r"(.*)(water body initiatives|programs)(.*)", [
         "Recent initiatives for water body cleanliness:\n- Namami Gange\n- Swachh Bharat Mission (SBM)\n- Amrit Sarovar Mission"
         "- River Rejuvenation Program\n- Clean Lake Program\n- Catch the Rain\n- Jal Jeevan Mission"
     ]),
-    (r"(.*)(eco-friendly industry practices)(.*)", [
-        "Eco-friendly practices for industries:\n- Reduce the use of pesticides, herbicides, and fertilizers"
+    (r"(.*)(daily practices)(.*)", [
+        " \n- Reduce the use of pesticides, herbicides, and fertilizers"
         "- Pick up after your pet\n- Wash your car less often\n- Dispose of hazardous waste properly"
         "- Conserve water\n- Use eco-friendly cleaning products\n- Avoid single-use plastics\n- Support sustainable businesses"
     ]),
-    (r"(.*)(health risks| health hazards)(.*)", [
-        "Health risks associated with contaminated water bodies include:\n- Gastrointestinal illnesses"
+    (r"(.*)(health risks | health hazards)(.*)", [
+        "\n- Gastrointestinal illnesses"
         "- Skin infections\n- Respiratory infections"
     ]),
-    (r"(.*)(pollution regulations)(.*)", [
+    (r"(.*)(pollution regulations | laws | acts)(.*)", [
         "Regulations and policies to protect water bodies:\n- The Water (Prevention and Control of Pollution) Act, 1974"
         "- The Environment (Protection) Act, 1986\n- The Water (Prevention and Control of Pollution) Cess Act, 1977"
         "- The Indian Penal Code, 1860 (Section 277)\n- State water pollution laws (e.g., Maharashtra Water (Prevention and Control of Pollution) Act, 1974, and Tamil Nadu Water (Prevention and Control of Pollution) Act, 1974)"
     ]),
-    (r"(.*)(common water pollutants| common pollutants)(.*)", [
-        "Common water pollutants include:\n- Cleaning products like bleach and liquid detergent",
-        "- Personal hygiene products like lotions and cosmetics\n- Certain medications\n- Pesticides and insecticides used in farming",
+    (r"(.*)(common water pollutants | common pollutants | common things that pollute water)(.*)", [
+        "Common water pollutants include:\n- Cleaning products like bleach and liquid detergent"
+        "- Personal hygiene products like lotions and cosmetics\n- Certain medications\n- Pesticides and insecticides used in farming"
         "- Paints, solvents, and thinners\n- Motor oils like petrol and diesel\n- Plastic bags and microplastics\n- E-waste"
     ]),
-    (r"(.*)(cleanup project funding)(.*)", [
-        "Funding opportunities for water body cleanup projects:\n- National River Conservation Plan",
-        "- Clean Ganga Fund (nmcg.nic.in)\n- Corporate social responsibility\n- Arghyam\n- Vasundhara foundation",
+    (r"(.*)(cleanup project funding | money)(.*)", [
+        "Funding opportunities for water body cleanup projects:\n- National River Conservation Plan"
+        "- Clean Ganga Fund (nmcg.nic.in)\n- Corporate social responsibility\n- Arghyam\n- Vasundhara foundation"
         "- Waste warriors\n- Environmentalist foundation of India\n- Goonj\n- River connect campaign"
     ]),
-    (r"(.*)(detect local water pollution)(.*)", [
-        "Signs of polluted local water bodies:\n- Unusual odor\n- Presence of scum\n- Unusual behavior of aquatic animals",
+    (r"(.*)(detect local water pollution  | how to tell if water is polluted)(.*)", [
+        "Signs of polluted local water bodies:\n- Unusual odor\n- Presence of scum\n- Unusual behavior of aquatic animals"
         "- Excessive growth of algae\n- Presence of plastic, litter, etc.\n- Discolored water"
     ]),
-    (r"(.*)(aquatic ecosystem impact)(.*)", [
-        "Impact of pollution on aquatic ecosystems and wildlife:\n- Loss of biodiversity\n- Habitat destruction",
+    (r"(.*)(aquatic ecosystem impact | marine life | aquatic life)(.*)", [
+        "Impact of pollution on aquatic ecosystems and wildlife:\n- Loss of biodiversity\n- Habitat destruction"
         "- Poisoning of water bodies\n- Disruption of the food chain\n- Reduced economic value"
     ]),
-    (r"(.*)(eco-friendly near water)(.*)", [
-        "Eco-friendly products and practices near water bodies:\n1. Don't submerge anything with chemical content into water",
+    (r"(.*)(not to do near water bodies | things to avoid)(.*)", [
+        "Eco-friendly practices near water bodies:\n1. Don't submerge anything with chemical content into water"
         "2. Don't dispose trash into water bodies\n3. Avoid damaging aquatic habitat"
     ]),
-    (r"(.*)(cleanliness drive alerts)(.*)", [
+    (r"(.*)(cleanliness drive alerts | drive alerts | campaign alerts)(.*)", [
         "Websites to receive alerts for cleanliness drives:\n- https://www.mygov.in\n- https://swechha.in"
-    ]),
-    (r"(.*)(water body pollutants)(.*)", [
-        "Common pollutants found in water bodies:\n- Bacterial and viral infections like salmonella and hepatitis A",
-        "- Parasitic infections like giardia\n- Cholera\n- Typhoid\n- Neurological disorders in children\n- Cancer\n- Zika virus\n- Malaria"
     ]),
     (r"(.*)(reduce household water usage|save water)(.*)", [
         "Ways to reduce household water usage:\n- Fix any leaks in your plumbing"
         "- Take shorter showers\n- Turn off the faucet when you brush your teeth or shave\n- Water your lawn less often"
         "- Install water-efficient appliances"
     ]),
-    (r"(.*)(agricultural runoff impact)(.*)", [
+    (r"(.*)(agricultural runoff impact | agriculture practices)(.*)", [
         "Impact of agricultural runoff on water bodies:\n- Algae blooms\n- Eutrophication\n- Harm to aquatic life"
     ]),
-    (r"(.*)(urban water pollutants)(.*)", [
-        "Common water pollutants in urban areas:\n- Oil and grease\n- Heavy metals\n- Pesticides",
+    (r"(.*)(urban water pollutants | water pollutants in cities)(.*)", [
+        "Common water pollutants in urban areas:\n- Oil and grease\n- Heavy metals\n- Pesticides"
         "- Fertilizers\n- Bacteria and viruses\n- Sediment\n- Trash"
     ]),
     (r"(.*)(wetlands importance)(.*)", [
         "Importance of wetlands in water body protection:\n- Natural filters",
-        "- Removing pollutants from water\n- Providing habitat for fish, birds, and other wildlife",
+        "- Removing pollutants from water\n- Providing habitat for fish, birds, and other wildlife"
         "- Helping to reduce flooding and erosion"
     ]),
     (r"(.*)(prevent lake eutrophication)(.*)", [
@@ -104,43 +100,43 @@ pairs = [
         "- Divert stormwater runoff away from the lake\n- Plant trees and other vegetation around the lake to help filter runoff"
     ]),
     (r"(.*)(dispose cleaning chemicals)(.*)", [
-        "Safe disposal of old household cleaning chemicals:\n- Take them to a hazardous waste collection center",
+        "Safe disposal of old household cleaning chemicals:\n- Take them to a hazardous waste collection center"
         "- Mix the chemicals with sand and place them in a sealed container"
     ]),
     (r"(.*)(urban planning in pollution)(.*)", [
-        "Role of urban planning in reducing water pollution:\n- Promoting green infrastructure",
+        "Role of urban planning in reducing water pollution:\n- Promoting green infrastructure"
         "- Reducing the amount of impervious surfaces, such as roads and parking lots"
     ]),
     (r"(.*)(sustainable fishing)(.*)", [
         "Key principles of sustainable fishing in rivers and oceans:\n- Fish only what you need to eat",
         "- Avoid fishing during spawning season\n- Release any fish that you do not intend to keep\n- Use barbless hooks and release fish carefully"
     ]),
-    (r"(.*)(plastic pollution impact)(.*)", [
-        "Impact of plastic pollution on marine life:\n- Plastic pollution can entangle marine animals, causing them to drown or starve",
+    (r"(.*)(plastic pollution impact | plastic pollution)(.*)", [
+        "Impact of plastic pollution on marine life:\n- Plastic pollution can entangle marine animals, causing them to drown or starve"
         "- Marine animals can mistake plastic for food and ingest it\n- It breaks down into tiny pieces called microplastics"
     ]),
-    (r"(.*)(wastewater treatment)(.*)", [
-        "Best practices for wastewater treatment in small communities:\n- Using lagoons",
+    (r"(.*)(wastewater treatment | reuse water)(.*)", [
+        "Best practices for wastewater treatment in small communities:\n- Using lagoons"
         "- Sequencing batch reactors\n- Activated sludge processes"
     ]),
-    (r"(.*)(climate change water impact)(.*)", [
-        "How climate change affects water bodies and their cleanliness:\n- Climate change can lead to more extreme weather events",
+    (r"(.*)(climate change water impact | climate change)(.*)", [
+        "How climate change affects water bodies and their cleanliness:\n- Climate change can lead to more extreme weather events"
         "- Such as droughts and floods, which can impact water quality and availability\n- Rising sea levels, which can inundate coastal wetlands and estuaries"
     ]),
     (r"(.*)(prevent invasive species)(.*)", [
-        "Ways to prevent the spread of invasive aquatic species:\n- Cleaning your boat and trailer thoroughly after each use",
+        "Ways to prevent the spread of invasive aquatic species:\n- Cleaning your boat and trailer thoroughly after each use"
         "- Avoiding transporting live fish or plants between water bodies\n- Reporting any sightings of invasive species to the authorities"
     ]),
-    (r"(.*)(groundwater pollution challenges)(.*)", [
-        "Challenges of managing groundwater pollution:\n- Reducing the use of pesticides and fertilizers",
+    (r"(.*)(groundwater pollution challenges | groundwater pollution)(.*)", [
+        "Challenges of managing groundwater pollution:\n- Reducing the use of pesticides and fertilizers"
         "- Lack of monitoring or well\n- Multiple sources of contamination\n- Resource constraints\n- Technological limitations"
     ]),
     (r"(.*)(land erosion water pollution)(.*)", [
-        "How land erosion contributes to water pollution:\n- Nutrient loading\n- Habitat disruption",
+        "How land erosion contributes to water pollution:\n- Nutrient loading\n- Habitat disruption"
         "- Chemical contaminants\n- Loss of fertility\n- Increased flooding risk"
     ]),
-    (r"(.*)(river pollution sources)(.*)", [
-        "Main sources of pollution in rivers:\n- Industrial Waste\n- Marine Dumping\n- Sewage and Wastewater",
+    (r"(.*)(river pollution sources | how does river get polluted)(.*)", [
+        "Main sources of pollution in rivers:\n- Industrial Waste\n- Marine Dumping\n- Sewage and Wastewater"
         "- Oil Leaks and Spills\n- Agriculture\n- Global Warming\n- Radioactive Waste"]),
     (r"(.*)(water quality|home|advanced technologies)(.*)", ["You can check water quality at home by observing clarity, odor, and particles."]),
     (r"(.*)(pollution in nearby river|chatbot)(.*)", ["Contact Central Pollution Control Board for reporting: Parivesh Bhawan, East Arjun Nagar, Delhi-110032, EPABX No.+91-11-43102030, E-mail ccb.cpcb@nic.in"]),
@@ -307,6 +303,7 @@ pairs = [
     (r"(.*)(clean energy technologies|water desalination)(.*)", ["Clean energy technologies support water desalination as a sustainable solution for water scarcity."]),    
 ]
 
+
 def respond_to_input(user_input):
     for pattern, responses in pairs:
         if re.match(pattern, user_input, re.IGNORECASE):
@@ -351,7 +348,7 @@ if input_method == "Text Input":
                 tts.save(tmp_audio_file.name)
 
             audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-            video_clip = mp.VideoFileClip("talking.mp4")  # Replace with your local video file path
+            video_clip = mp.VideoFileClip("C:/Users/dell/Downloads/talking.mp4")  # Replace with your local video file path
 
             # Optimize MoviePy operations
             video_clip = video_clip.resize(height=720)  # Set the output resolution to 720p
