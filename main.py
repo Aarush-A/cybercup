@@ -327,69 +327,51 @@ def capture_audio(energy_threshold):
         audio = recognizer.listen(source, timeout=5)
     return audio
 
-# Add a radio button for input method
-input_method = st.radio("Select input method:", ("Text Input", "Voice Input"))
+user_input = st.text_input("Enter text or click the 🎙 Record Speech button to speak:", key="user_input")
 
-if input_method == "Text Input":
-    user_input = st.text_input("Enter text:", key="user_input")
-    
-    if st.button("Submit") or enter_pressed:
-        enter_pressed = False
-        if user_input.lower() == "exit":
-            st.write("Chatbot: Goodbye!")
+if st.button("🎙 Record Speech"):
+    try:
+        st.write("Listening...")
+        energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
+        audio = capture_audio(energy_threshold)
+        user_speech = recognizer.recognize_google(audio)
+        
+        # Set recognized speech as the value of the text input
+        user_input = user_speech
+        st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
+    except sr.UnknownValueError:
+        st.write("I could not understand the audio.")
+    except sr.RequestError as e:
+        st.write(f"Error: {e}")
+
+if st.button("Submit") or enter_pressed:
+    enter_pressed = False
+    if user_input.lower() == "exit":
+        st.write("Chatbot: Goodbye!")
+    else:
+        responses = respond_to_input(user_input)
+        chatbot_response = responses[0]
+        st.write("Chatbot:", chatbot_response)
+
+        tts = gTTS(chatbot_response)
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
+            tts.save(tmp_audio_file.name)
+
+        audio_clip = mp.AudioFileClip(tmp_audio_file.name)
+        video_clip = mp.VideoFileClip(r"C:\Users\dell\Downloads\talkingreal.mp4")  # Replace with your video file
+
+        if audio_clip.duration > video_clip.duration:
+            num_loops = int(audio_clip.duration / video_clip.duration) + 1
+            video_clip_loop = mp.concatenate_videoclips([video_clip] * num_loops)
+            video_clip_loop = video_clip_loop.subclip(0, audio_clip.duration)
+            combined_clip = video_clip_loop.set_audio(audio_clip)
         else:
-            responses = respond_to_input(user_input)
-            chatbot_response = responses[0]
-            st.write("Chatbot:", chatbot_response)
+            combined_clip = video_clip.set_audio(audio_clip)
+            combined_clip = combined_clip.set_duration(audio_clip.duration)  # Set video duration to match audio
 
-            tts = gTTS(chatbot_response)
-            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
-                tts.save(tmp_audio_file.name)
+        # Save the combined video to a temporary file
+        combined_video_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+        combined_clip.write_videofile(combined_video_path, codec="libx264", audio_codec="aac")
 
-            audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-            video_clip = mp.VideoFileClip(r"C:\Users\dell\Downloads\talkingreal.mp4")  # Replace with your video file
-
-            if audio_clip.duration > video_clip.duration:
-                num_loops = int(audio_clip.duration / video_clip.duration) + 1
-                video_clip_loop = mp.concatenate_videoclips([video_clip] * num_loops)
-                video_clip_loop = video_clip_loop.subclip(0, audio_clip.duration)
-                combined_clip = video_clip_loop.set_audio(audio_clip)
-            else:
-                combined_clip = video_clip.set_audio(audio_clip)
-                combined_clip = combined_clip.set_duration(audio_clip.duration)  # Set video duration to match audio
-
-            # Save the combined video to a temporary file
-            combined_video_path = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
-            combined_clip.write_videofile(combined_video_path, codec="libx264", audio_codec="aac")
-
-            # Display the video using HTML and control its size with custom CSS
-            st.markdown(f'<video src="data:video/mp4;base64,{base64.b64encode(open(combined_video_path, "rb").read()).decode()}" autoplay controls style="width:100%"></video>', unsafe_allow_html=True)
-
-if input_method == "Voice Input":
-    user_input = st.text_input("Enter text:", key="user_input")
-    if st.button("🎙️ Record Speech"):
-        try:
-            st.write("Listening...")
-            energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
-            audio = capture_audio(energy_threshold)
-            user_speech = recognizer.recognize_google(audio)
-            
-            # Set recognized speech as the value of the text input
-            user_input = st.text_input("Enter text:", key="user_input", value=user_speech)
-            
-            st.write("You (speech):", user_speech)
-
-            if user_speech.lower() == "exit":
-                st.write("Chatbot: Goodbye!")
-            else:
-                responses = respond_to_input(user_speech)
-                chatbot_response = responses[0]
-                st.write("Chatbot:", chatbot_response)
-
-                tts = gTTS(chatbot_response)
-                with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio_file:
-                    tts.save(tmp_audio_file.name)
-        except sr.UnknownValueError:
-            st.write("I could not understand the audio.")
-        except sr.RequestError as e:
-            st.write(f"Error: {e}")
+        # Display the video using HTML and control its size with custom CSS
+        st.markdown(f'<video src="data:video/mp4;base64,{base64.b64encode(open(combined_video_path, "rb").read()).decode()}" autoplay controls style="width:100%"></video>', unsafe_allow_html=True)
