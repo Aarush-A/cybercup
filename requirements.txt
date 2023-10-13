@@ -1,6 +1,6 @@
 streamlit
 pyaudio
-speech_recognition
+SpeechRecognition
 nltk
 gtts
 moviepy
