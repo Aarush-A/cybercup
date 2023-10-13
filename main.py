@@ -327,17 +327,18 @@ def capture_audio(energy_threshold):
         audio = recognizer.listen(source, timeout=5)
     return audio
 
-def check_microphone_availability():
-    available_microphones = sr.Microphone().list_microphone_names()
-    return available_microphones
-
 # Check if a microphone is available
-available_microphones = check_microphone_availability()
+def is_microphone_available():
+    try:
+        available_microphones = sr.Microphone.list_microphone_names()
+        return len(available_microphones) > 0
+    except OSError:
+        return False
 
 user_input = st.text_input("Enter text or click the 🎙️ Record Speech button to speak:", key="user_input")
 
 if st.button("🎙️ Record Speech"):
-    if available_microphones:
+    if is_microphone_available():
         try:
             st.write("Listening...")
             energy_threshold = set_dynamic_energy_threshold(sr.Microphone(device_index=None))
