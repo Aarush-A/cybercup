@@ -8,7 +8,7 @@ import moviepy.editor as mp
 import base64
 
 pairs = [
-    (r"(hello|hi|hey|start)", ["Hello! i am your friendly neighbourhood water saver bot ", "Hi there!"]),
+    (r"(hello|hi|hey|start)", ["Hello! i am Lantern!! ", "Hi there!"]),
     (r"(.*)(check water quality|ways to check water)(.*)", [
         "If the water is clear and has no visible particles, it is a good sign."
         "Cloudy water or water with particles may contain impurities."
@@ -308,7 +308,7 @@ def respond_to_input(user_input):
             return responses
     return ["I'm not sure how to respond to that"]
 
-st.title("Water Conservation Bot")
+st.title("Lanturn AI")
 
 recognizer = sr.Recognizer()
 tmp_audio_file = None
