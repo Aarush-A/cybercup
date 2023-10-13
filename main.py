@@ -302,7 +302,6 @@ pairs = [
     (r"(.*)(effective water management|watershed councils)(.*)", ["Effective water management involves collaboration with watershed councils and local stakeholders."]),
     (r"(.*)(clean energy technologies|water desalination)(.*)", ["Clean energy technologies support water desalination as a sustainable solution for water scarcity."]),    
 ]
-
 def respond_to_input(user_input):
     for pattern, responses in pairs:
         if re.match(pattern, user_input, re.IGNORECASE):
@@ -322,27 +321,38 @@ def set_dynamic_energy_threshold(source):
     return energy_threshold
 
 def capture_audio(energy_threshold):
-    with sr.Microphone() as source:
+    with sr.Microphone(device_index=None) as source:
         recognizer.energy_threshold = energy_threshold
         audio = recognizer.listen(source, timeout=5)
     return audio
 
-user_input = st.text_input("Enter text or click the 🎙 Record Speech button to speak:", key="user_input")
-
-if st.button("🎙 Record Speech"):
+# Check if a microphone is available
+def is_microphone_available():
     try:
-        st.write("Listening...")
-        energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
-        audio = capture_audio(energy_threshold)
-        user_speech = recognizer.recognize_google(audio)
-        
-        # Set recognized speech as the value of the text input
-        user_input = user_speech
-        st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
-    except sr.UnknownValueError:
-        st.write("I could not understand the audio.")
-    except sr.RequestError as e:
-        st.write(f"Error: {e}")
+        available_microphones = sr.Microphone.list_microphone_names()
+        return len(available_microphones) > 0
+    except OSError:
+        return False
+
+user_input = st.text_input("Enter text or click the 🎙️ Record Speech button to speak:", key="user_input")
+
+if st.button("🎙️ Record Speech"):
+    if is_microphone_available():
+        try:
+            st.write("Listening...")
+            energy_threshold = set_dynamic_energy_threshold(sr.Microphone(device_index=None))
+            audio = capture_audio(energy_threshold)
+            user_speech = recognizer.recognize_google(audio)
+            
+            # Set recognized speech as the value of the text input
+            user_input = user_speech
+            st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
+        except sr.UnknownValueError:
+            st.write("I could not understand the audio.")
+        except sr.RequestError as e:
+            st.write(f"Error: {e}")
+    else:
+        st.write("No microphone available. Please check your microphone configuration.")
 
 if st.button("Submit") or enter_pressed:
     enter_pressed = False
@@ -358,7 +368,7 @@ if st.button("Submit") or enter_pressed:
             tts.save(tmp_audio_file.name)
 
         audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-        video_clip = mp.VideoFileClip(r"C:\Users\dell\Downloads\talkingreal.mp4")  # Replace with your video file
+        video_clip = mp.VideoFileClip("talkingreal.mp4")  # Replace with your video file
 
         if audio_clip.duration > video_clip.duration:
             num_loops = int(audio_clip.duration / video_clip.duration) + 1
