@@ -351,7 +351,7 @@ if input_method == "Text Input":
                 tts.save(tmp_audio_file.name)
 
             audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-            video_clip = mp.VideoFileClip("C:/Users/dell/Downloads/talking.mp4")  # Replace with your local video file path
+            video_clip = mp.VideoFileClip("talking.mp4")  # Replace with your local video file path
 
             # Optimize MoviePy operations
             video_clip = video_clip.resize(height=720)  # Set the output resolution to 720p
