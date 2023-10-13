@@ -322,27 +322,37 @@ def set_dynamic_energy_threshold(source):
     return energy_threshold
 
 def capture_audio(energy_threshold):
-    with sr.Microphone() as source:
+    with sr.Microphone(device_index=None) as source:
         recognizer.energy_threshold = energy_threshold
         audio = recognizer.listen(source, timeout=5)
     return audio
 
-user_input = st.text_input("Enter text or click the 🎙 Record Speech button to speak:", key="user_input")
+def check_microphone_availability():
+    available_microphones = sr.Microphone().list_microphone_names()
+    return available_microphones
 
-if st.button("🎙 Record Speech"):
-    try:
-        st.write("Listening...")
-        energy_threshold = set_dynamic_energy_threshold(sr.Microphone())
-        audio = capture_audio(energy_threshold)
-        user_speech = recognizer.recognize_google(audio)
-        
-        # Set recognized speech as the value of the text input
-        user_input = user_speech
-        st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
-    except sr.UnknownValueError:
-        st.write("I could not understand the audio.")
-    except sr.RequestError as e:
-        st.write(f"Error: {e}")
+# Check if a microphone is available
+available_microphones = check_microphone_availability()
+
+user_input = st.text_input("Enter text or click the 🎙️ Record Speech button to speak:", key="user_input")
+
+if st.button("🎙️ Record Speech"):
+    if available_microphones:
+        try:
+            st.write("Listening...")
+            energy_threshold = set_dynamic_energy_threshold(sr.Microphone(device_index=None))
+            audio = capture_audio(energy_threshold)
+            user_speech = recognizer.recognize_google(audio)
+            
+            # Set recognized speech as the value of the text input
+            user_input = user_speech
+            st.text_area("You (speech):", value=user_speech, key="user_speech", height=100)
+        except sr.UnknownValueError:
+            st.write("I could not understand the audio.")
+        except sr.RequestError as e:
+            st.write(f"Error: {e}")
+    else:
+        st.write("No microphone available. Please check your microphone configuration.")
 
 if st.button("Submit") or enter_pressed:
     enter_pressed = False
@@ -358,7 +368,7 @@ if st.button("Submit") or enter_pressed:
             tts.save(tmp_audio_file.name)
 
         audio_clip = mp.AudioFileClip(tmp_audio_file.name)
-        video_clip = mp.VideoFileClip("talkingreal.mp4")  # Replace with your video file
+        video_clip = mp.VideoFileClip(r"C:\Users\dell\Downloads\talkingreal.mp4")  # Replace with your video file
 
         if audio_clip.duration > video_clip.duration:
             num_loops = int(audio_clip.duration / video_clip.duration) + 1
